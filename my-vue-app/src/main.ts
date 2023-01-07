@@ -70,7 +70,27 @@
 // console.log(a, b, c)
 
 //什么是 unknown?  unknown 其实就是当前的这个值目前不确定, 比如从Ajax请求的数据的类型是不确定的,这时候就可以使用 unknown
-const a: unknown = 1
-const b = ( a as number)
-console.log(b)
+// const a: unknown = 1
+// const b = ( a as number)
+// console.log(b)
+
+
+//enum 枚举类型 用来定义一些常量的 一般用来定义一些状态
+enum Permission {
+    admin = 0, //0000
+    user = 1 << 0, //0001
+    vip = 1 << 1, //0010
+    superVip = 1 << 2, //0100
+    marge = admin | user | vip | superVip //0111
+}
+
+type User = {
+    permission: Permission
+}
+
+const user: User = {permission : 0b0010}
+
+if ((user.permission & Permission.vip) === Permission.vip) { // & 位运算符 两个都是1的时候才是1 有一个不是1的时候就是0 0010 & 0010 = 0010    0010 & 0001 = 0000
+    console.log('vip')
+}
 export {}
