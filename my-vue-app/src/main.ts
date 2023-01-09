@@ -100,4 +100,217 @@
 // 需要枚举的值是字符串和数字的时候 建议少用这种方式 用JavaScript中的对象来代替
 // enum  除了数字和字符串之外 其他的数据类型值都不可以
 
+//never类型例子
+// function error(message: string): never {
+//     throw new Error(message)
+// }
+//
+// console.log(error('123'))
+
+// interface A {
+//     type: 'foo'
+// }
+//
+// interface B {
+//     type: 'bar'
+// }
+//
+// type All = A | B
+//
+// const a: All = {type: 'foo'}
+// const b: All = {type: 'bar'}
+//
+// if (a.type === 'foo') {
+//     console.log(a.type)
+// }else if (b.type === 'bar') {
+//     console.log(b.type)
+// }else {
+//     const check: never = a
+//     console.log(check)
+// }
+
+//联合类型例子
+// type A1 = number
+// type B1 = string
+// type C1 = A1 | B1
+// const a1: C1 = 1
+// console.log(a1)
+
+//联合类型例子
+// type A2 = {a: number}
+// type B2 = {b: string}
+// type C2 = A2 | B2
+// const a2: C2 = {a: 1,b: '2'}
+// console.log(a2)
+
+// 类型收窄
+/*typeof 存在的弊端
+* 1. typeof 判断数组对象 返回的是object
+* 2. typeof 判断普通对象 返回的是object
+* 3. typeof 判断日期对象 返回的是object
+* 4. typeof 判断正则对象 返回的是object
+* 5. typeof 判断null 返回的是object
+* */
+// const f1 = (a: number | string) => {
+//     if (typeof a === 'number') {
+//         return a.toFixed(2)
+//     } else {
+//         return a.trim()
+//     }
+// }
+// f1(1.1245)
+
+// 使用instanceof判断
+// const f1 = (a: Array<Date> | Date) => {
+//     if (a instanceof Date) {
+//         return a.toLocaleString()
+//     } else if (a instanceof Array) {
+//         return a.map(item => item.toLocaleString())
+//     } else {
+//         throw new Error('类型错误')
+//     }
+// }
+// console.log(f1([new Date(), new Date()]))
+
+//instanceof 存在的弊端
+/*
+* 1. instanceof 不可以判断基本类型
+* 2. instanceof 不可以判断TS自定义类型
+* 3. instanceof 不可以判断 typescript 中特有的类型
+* */
+//比如如下的例子
+// type Person = {
+//     name: string
+// }
+// const f1 = (a: Person | Person[]) => {
+//     // if(a instanceof Person){} //这里会报错 因为Person是一个自定义类型 不能使用instanceof判断
+//     // if(typeof a === Person){}   //这里也会报错 因为Person是一个自定义类型 不能使用typeof判断
+// }
+
+//使用in判断
+// type Person = {
+//     name: string
+// }
+
+
+// in也只支持部分对象
+// const f1 = (a: Person | Person[]) => {
+//     if ('name' in a) {
+//         return a.name
+//     } else {
+//         return a.map(item => item.name)
+//     }
+// }
+
+// // 使用js中判断类型的函数来区分?
+// const f1 = (a: string | string[]) => {
+//     if(Array.isArray(a)){
+//         return a.join('\n').toString()
+//     }else if (typeof a === 'string'){
+//         return parseFloat(a).toFixed(2)
+//     }else {
+//         return a
+//     }
+//
+// }
+
+//使用逻辑来收窄类型
+// const f1 = (a?: string[]) => {
+//     if(a){
+//         a //这里的a就是string[]
+//     }else{
+//         a //这里的a就是undefined
+//     }
+// }
+
+// const f1 = (x: string | number, y: string | boolean) => {
+//     if(x === y){
+//         x // string
+//         y // string
+//     }else{
+//         x // string | number
+//         y // string | boolean
+//     }
+// }
+
+
+//类型谓词 is
+// type Rect = { height: number, width: number }
+// type Circle = { center: [number, number], radius: number }
+//
+// function isRect(x: Rect | Circle): x is Rect { //这里的x is Rect就是类型谓词 不可以写boolean
+//     return 'height' in x && 'width' in x
+// }
+//
+// const f1 = (a: Rect | Circle) => {
+//     if (isRect(a)) {
+//         return a.height * a.width
+//     } else {
+//         return a.radius * a.radius * Math.PI
+//     }
+// }
+
+/*
+is 的优点
+1. 支持所有 typescript类型
+is 的缺点
+麻烦
+* */
+
+// 回到上面的问题, 如何使用联合类型? 收窄类型?
+
+// type A = {kind: 'A', a: number}
+// type B = {kind: 'B', b: string}
+//
+// const f1 = (a: A | B) => {
+//     if(a.kind === 'A'){
+//         return a.a
+//     }else{
+//         return a.b
+//     }
+// }
+
+//上面的写法很傻
+
+//可辨别联合
+
+// interface Circle {
+//     kind: 'circle',
+//     radius: number
+// }
+//
+// interface Square {
+//     kind: 'square',
+//     sideLength: number
+// }
+//
+// type Shape = Circle | Square
+//
+// const f1 = (shape: Shape) => {
+//     if (shape.kind === 'circle') {
+//         return shape.radius * shape.radius * Math.PI
+//     } else if (shape.kind === 'square') {
+//         return shape.sideLength * shape.sideLength
+//     } else {
+//         return shape
+//     }
+// }
+
+//上面的写法就很好
+// 让复杂类型的收窄变成 简单类型的收窄
+// 一句话总结上面的方案: 同名、可辨别的简单类型的 key
+
+//any 类型 任何类型都可以赋值给any类型 但是any类型不能赋值给其他类型 除非是any类型
+// const f1 = (a: any) => {
+//     a.toFixed(1)
+// }
+
+//unknown类型
+// unknown 的优点
+// 可以反悔
+// const f1 = (a: unknown) => {
+//     if (a instanceof Date) {
+//         a //这里的a就是Date类型
+//     }
+// }
 export {}
